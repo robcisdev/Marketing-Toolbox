@@ -1,0 +1,678 @@
+<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Softtek QR Code Generator</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      .dark-mode-text {
+        color: #f0f0f0;
+      }
+      .dark-mode-bg {
+        background-color: rgba(24, 24, 24, 0.8);
+      }
+    }
+
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-image: url('https://pfst.cf2.poecdn.net/base/image/80c0a554fa77897e898fac1d6878802f538bc55c1ed2faa4b09d30ece939946f?w=3840&h=2160');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .dark .glass-effect {
+      background: rgba(28, 28, 28, 0.65);
+      border: 1px solid rgba(70, 70, 70, 0.2);
+    }
+
+    input, textarea {
+      background: rgba(255, 255, 255, 0.6);
+      transition: all 0.3s ease;
+    }
+    
+    .dark input, .dark textarea {
+      background: rgba(40, 40, 40, 0.6);
+      color: #f0f0f0;
+      border-color: rgba(70, 70, 70, 0.5);
+    }
+
+    input:focus, textarea:focus {
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 0 3px rgba(93, 92, 222, 0.3);
+      border-color: #5D5CDE;
+    }
+    
+    .dark input:focus, .dark textarea:focus {
+      background: rgba(50, 50, 50, 0.9);
+      box-shadow: 0 0 0 3px rgba(93, 92, 222, 0.3);
+      border-color: #5D5CDE;
+    }
+
+    .primary-button {
+      background-color: #5D5CDE;
+      transition: all 0.3s ease;
+    }
+
+    .primary-button:hover {
+      background-color: #4a49b8;
+      transform: translateY(-2px);
+    }
+
+    .container-wrapper {
+      animation: fadeIn 0.8s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .qr-display canvas {
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .qr-display canvas:hover {
+      transform: scale(1.02);
+    }
+    
+    .logo-container {
+      position: relative;
+      margin-bottom: 10px;
+    }
+    
+    .logo-img {
+      max-width: 150px;
+      height: auto;
+    }
+    
+    .tab {
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .tab.active {
+      color: #5D5CDE;
+      font-weight: 500;
+    }
+    
+    .tab.active:after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: #5D5CDE;
+      border-radius: 3px;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    .dark .tab.active {
+      color: #7b7aec;
+    }
+    
+    .dark .tab.active:after {
+      background-color: #7b7aec;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+</head>
+<body class="flex flex-col items-center justify-between p-4">
+  <script>
+    // Dark mode detection
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+      if (event.matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    });
+  </script>
+
+  <div class="container-wrapper w-full max-w-md mx-auto">
+    <!-- Logo container -->
+    <div class="logo-container flex justify-center mb-4 mt-6">
+      <img src="https://pfst.cf2.poecdn.net/base/image/190e3b82b539f06bcb7f591718397d09164c781f0f9a43bb801e3b917ca2646c?w=207&amp;h=106" alt="Softtek Logo" class="logo-img">
+    </div>
+
+    <!-- App Title -->
+    <h1 class="text-2xl font-light text-center mb-4 dark-mode-text">QR Code Generator</h1>
+
+    <!-- Tab Navigation -->
+    <div class="flex justify-center mb-6">
+      <div class="glass-effect rounded-lg flex p-1">
+        <button id="emailTab" class="tab active px-5 py-2 rounded-md">Email</button>
+        <button id="whatsappTab" class="tab px-5 py-2 rounded-md">WhatsApp</button>
+      </div>
+    </div>
+
+    <!-- Email Form -->
+    <div id="emailContent" class="tab-content active">
+      <form id="emailForm" class="glass-effect rounded-xl p-6 mb-6">
+        <div class="space-y-4">
+          <input type="email" id="email" placeholder="Recipient's Email" required="" class="w-full px-4 py-3 text-base rounded-lg border focus:outline-none">
+          
+          <input type="text" id="subject" placeholder="Subject" required="" class="w-full px-4 py-3 text-base rounded-lg border focus:outline-none">
+          
+          <textarea id="body" rows="5" placeholder="Email Body" required="" class="w-full px-4 py-3 text-base rounded-lg border focus:outline-none resize-none"></textarea>
+          
+          <button type="submit" class="w-full primary-button text-white font-light py-3 px-4 rounded-lg focus:outline-none">
+            Generate QR Code
+          </button>
+        </div>
+      </form>
+      
+      <!-- Email QR Code Display -->
+      <div id="emailQrCode" class="qr-display flex flex-col items-center space-y-4 mb-8"></div>
+    </div>
+
+    <!-- WhatsApp Form -->
+    <div id="whatsappContent" class="tab-content">
+      <form id="whatsappForm" class="glass-effect rounded-xl p-6 mb-6">
+        <div class="space-y-4">
+          <div class="relative">
+            <input type="tel" id="phoneNumber" placeholder="Phone Number (with country code)" required="" class="w-full px-4 py-3 pl-10 text-base rounded-lg border focus:outline-none">
+            <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">+</div>
+          </div>
+          
+          <textarea id="whatsappMessage" rows="5" placeholder="WhatsApp Message" required="" class="w-full px-4 py-3 text-base rounded-lg border focus:outline-none resize-none"></textarea>
+          
+          <div class="text-xs text-gray-500 dark:text-gray-400 italic">
+            Enter phone number with country code (e.g., 5215518832771 for Mexico)
+          </div>
+          
+          <button type="submit" class="w-full primary-button text-white font-light py-3 px-4 rounded-lg focus:outline-none">
+            Generate WhatsApp QR Code
+          </button>
+        </div>
+      </form>
+      
+      <!-- WhatsApp QR Code Display -->
+      <div id="whatsappQrCode" class="qr-display flex flex-col items-center space-y-4 mb-8"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="w-full max-w-md glass-effect rounded-xl py-3 px-4 text-center text-xs dark-mode-text">
+    Softtek All Rights Reserved - Designed by Roberto Cisneros © Valores Corporativos Softtek S.A. de C.V. 2025-2026 - Confidential
+  </footer>
+
+  <script>
+    // Tab functionality
+    const emailTab = document.getElementById('emailTab');
+    const whatsappTab = document.getElementById('whatsappTab');
+    const emailContent = document.getElementById('emailContent');
+    const whatsappContent = document.getElementById('whatsappContent');
+    
+    emailTab.addEventListener('click', () => {
+      emailTab.classList.add('active');
+      whatsappTab.classList.remove('active');
+      emailContent.classList.add('active');
+      whatsappContent.classList.remove('active');
+    });
+    
+    whatsappTab.addEventListener('click', () => {
+      whatsappTab.classList.add('active');
+      emailTab.classList.remove('active');
+      whatsappContent.classList.add('active');
+      emailContent.classList.remove('active');
+    });
+
+    // Email QR code generation
+    document.getElementById('emailForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const subject = encodeURIComponent(document.getElementById('subject').value);
+      const body = encodeURIComponent(document.getElementById('body').value);
+
+      const mailtoLink = `mailto:${email}?subject=${subject}&body=${body}`;
+
+      const qrCodeContainer = document.getElementById('emailQrCode');
+      qrCodeContainer.innerHTML = ''; // Clear any previous QR Code
+
+      // Generate QR Code
+      generateQRCode(mailtoLink, qrCodeContainer, 'Email QR Code');
+    });
+    
+    // WhatsApp QR code generation
+    document.getElementById('whatsappForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      // Get the phone number and ensure it's formatted correctly
+      let phoneNumber = document.getElementById('phoneNumber').value;
+      
+      // Remove any non-numeric characters
+      phoneNumber = phoneNumber.replace(/\D/g, '');
+      
+      // Ensure it has a "+" prefix
+      if (!phoneNumber.startsWith('+')) {
+        phoneNumber = '+' + phoneNumber;
+      }
+      
+      const message = encodeURIComponent(document.getElementById('whatsappMessage').value);
+
+      // Create the WhatsApp API URL
+      const whatsappLink = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${message}`;
+
+      const qrCodeContainer = document.getElementById('whatsappQrCode');
+      qrCodeContainer.innerHTML = ''; // Clear any previous QR Code
+
+      // Generate QR Code
+      generateQRCode(whatsappLink, qrCodeContainer, 'WhatsApp QR Code');
+    });
+    
+    // Common function to generate QR code with logo and add copy button
+    function generateQRCode(link, container, altText) {
+      // Show loading indicator
+      const loadingEl = document.createElement('div');
+      loadingEl.className = 'text-center text-sm text-gray-500 dark:text-gray-400 mb-2';
+      loadingEl.innerHTML = 'Generating QR code...';
+      container.appendChild(loadingEl);
+      
+      // Generate QR Code
+      QRCode.toCanvas(link, { 
+        width: 320, 
+        margin: 4,
+        color: {
+          dark: '#5D5CDE',
+          light: '#ffffff'
+        },
+        errorCorrectionLevel: 'Q' // Balance between capacity and error correction
+      }, function (err, canvas) {
+        // Remove loading indicator
+        container.removeChild(loadingEl);
+        
+        if (err) {
+          console.error(err);
+          const errorEl = document.createElement('div');
+          errorEl.className = 'text-red-500 text-center';
+          errorEl.innerText = 'Error generating QR code';
+          container.appendChild(errorEl);
+          return;
+        }
+        
+        // Create a new canvas for the final QR code with logo
+        const finalCanvas = document.createElement('canvas');
+        const ctx = finalCanvas.getContext('2d');
+        
+        // Set dimensions equal to the QR code canvas
+        finalCanvas.width = canvas.width;
+        finalCanvas.height = canvas.height;
+        
+        // Draw the QR code onto the new canvas
+        ctx.drawImage(canvas, 0, 0);
+        
+        // Create and load a higher resolution version of the Softtek logo
+        const logo = new Image();
+        logo.crossOrigin = "anonymous";
+        logo.src = "https://pfst.cf2.poecdn.net/base/image/190e3b82b539f06bcb7f591718397d09164c781f0f9a43bb801e3b917ca2646c?w=414&h=212"; // Requesting a higher resolution version
+        
+        logo.onload = function() {
+          // Calculate background square size (about 27% of QR code)
+          const bgSize = canvas.width * 0.27;
+          
+          // Calculate position to center the background
+          const bgX = (canvas.width - bgSize) / 2;
+          const bgY = (canvas.height - bgSize) / 2;
+          
+          // Create a white square background with slight border radius
+          ctx.fillStyle = 'white';
+          
+          // Fill regular rectangle first
+          ctx.fillRect(bgX, bgY, bgSize, bgSize);
+          
+          // Enable image smoothing for better quality
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          
+          // Calculate logo dimensions while maintaining aspect ratio
+          const logoAspectRatio = logo.width / logo.height;
+          let logoWidth, logoHeight;
+          
+          // Set logo to fit within 85% of the white background square
+          const maxLogoSize = bgSize * 0.85;
+          
+          if (logoAspectRatio > 1) {
+            // Logo is wider than tall
+            logoWidth = maxLogoSize;
+            logoHeight = logoWidth / logoAspectRatio;
+          } else {
+            // Logo is taller than wide or square
+            logoHeight = maxLogoSize;
+            logoWidth = logoHeight * logoAspectRatio;
+          }
+          
+          // Calculate position to center the logo within the background
+          const logoX = bgX + (bgSize - logoWidth) / 2;
+          const logoY = bgY + (bgSize - logoHeight) / 2;
+          
+          // Apply a subtle sharpening effect to the logo using an offscreen canvas
+          const offscreenCanvas = document.createElement('canvas');
+          const offCtx = offscreenCanvas.getContext('2d');
+          offscreenCanvas.width = logoWidth * 1.5;  // Creating it larger for better quality
+          offscreenCanvas.height = logoHeight * 1.5;
+          
+          // Draw the logo at higher resolution
+          offCtx.drawImage(logo, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
+          
+          // Draw the sharpened logo
+          ctx.drawImage(offscreenCanvas, logoX, logoY, logoWidth, logoHeight);
+          
+          // Apply styles to the canvas
+          finalCanvas.classList.add('rounded-lg');
+          finalCanvas.setAttribute('alt', altText);
+          container.appendChild(finalCanvas);
+          
+          // Add info about the logo in QR code
+          const infoText = document.createElement('div');
+          infoText.className = 'text-xs text-center text-gray-500 dark:text-gray-400 mt-1 mb-2';
+          infoText.innerText = 'QR code includes Softtek logo';
+          container.appendChild(infoText);
+  
+          // Add Download Button
+          const downloadButton = document.createElement('button');
+          downloadButton.className = 'primary-button text-white font-light py-2 px-4 rounded-lg focus:outline-none mb-2';
+          downloadButton.innerText = 'Download QR Code';
+          downloadButton.addEventListener('click', function () {
+            try {
+              // Create a new canvas with larger size
+              const downloadCanvas = document.createElement('canvas');
+              const padding = 20;
+              const totalWidth = finalCanvas.width + (padding * 2);
+              const totalHeight = finalCanvas.height + (padding * 2);
+              
+              downloadCanvas.width = totalWidth;
+              downloadCanvas.height = totalHeight;
+              
+              // Get the canvas context
+              const ctx = downloadCanvas.getContext('2d');
+              
+              // Make sure we have the context
+              if (!ctx) {
+                console.error('Failed to get canvas context');
+                // Fallback to regular image
+                const link = document.createElement('a');
+                link.download = 'softtek-qrcode.png';
+                link.href = finalCanvas.toDataURL('image/png');
+                link.click();
+                return;
+              }
+              
+              // Draw white background
+              ctx.fillStyle = 'white';
+              ctx.fillRect(0, 0, totalWidth, totalHeight);
+              
+              // Edge-compatible approach to draw rounded rectangles
+              const radius = 24;
+              const width = totalWidth - (padding * 2);
+              const height = totalHeight - (padding * 2);
+              const x = padding;
+              const y = padding;
+              
+              // Custom method to draw rounded rectangle
+              function drawRoundedRect(ctx, x, y, width, height, radius) {
+                if (width < 2 * radius) radius = width / 2;
+                if (height < 2 * radius) radius = height / 2;
+                
+                // Begin path
+                ctx.beginPath();
+                
+                // Top-left arc
+                ctx.arc(x + radius, y + radius, radius, Math.PI, Math.PI * 1.5);
+                
+                // Top line
+                ctx.moveTo(x + radius, y);
+                ctx.lineTo(x + width - radius, y);
+                
+                // Top-right arc
+                ctx.arc(x + width - radius, y + radius, radius, Math.PI * 1.5, 0);
+                
+                // Right line
+                ctx.lineTo(x + width, y + height - radius);
+                
+                // Bottom-right arc
+                ctx.arc(x + width - radius, y + height - radius, radius, 0, Math.PI * 0.5);
+                
+                // Bottom line
+                ctx.lineTo(x + radius, y + height);
+                
+                // Bottom-left arc
+                ctx.arc(x + radius, y + height - radius, radius, Math.PI * 0.5, Math.PI);
+                
+                // Left line
+                ctx.lineTo(x, y + radius);
+                
+                ctx.closePath();
+              }
+              
+              // Create a clipping mask for the rounded rectangle
+              drawRoundedRect(ctx, x, y, width, height, radius);
+              ctx.save();
+              ctx.clip();
+              
+              // Draw the QR code on top
+              ctx.drawImage(finalCanvas, padding, padding);
+              
+              // Restore the context
+              ctx.restore();
+              
+              // Edge can sometimes have issues with toDataURL, add try/catch
+              try {
+                const dataURL = downloadCanvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = 'softtek-qrcode.png';
+                link.href = dataURL;
+                link.click();
+              } catch (err) {
+                console.error('Failed to create dataURL', err);
+                alert('There was a problem downloading the QR code. Please try again or try a different browser.');
+              }
+            } catch (err) {
+              console.error('Error in download process', err);
+              // Fallback to basic download without rounded corners
+              const link = document.createElement('a');
+              link.download = 'softtek-qrcode.png';
+              link.href = finalCanvas.toDataURL('image/png');
+              link.click();
+            }
+          });
+          container.appendChild(downloadButton);
+  
+          // Add Copy Button
+          const copyButton = document.createElement('button');
+          copyButton.className = 'primary-button text-white font-light py-2 px-4 rounded-lg focus:outline-none';
+          copyButton.innerText = 'Copy QR Code to Clipboard';
+          copyButton.addEventListener('click', function () {
+            try {
+              // Create a new canvas for rounded corners
+              const clipboardCanvas = document.createElement('canvas');
+              const padding = 20;
+              const totalWidth = finalCanvas.width + (padding * 2);
+              const totalHeight = finalCanvas.height + (padding * 2);
+              
+              clipboardCanvas.width = totalWidth;
+              clipboardCanvas.height = totalHeight;
+              
+              // Get the canvas context
+              const ctx = clipboardCanvas.getContext('2d');
+              
+              // Make sure we have the context
+              if (!ctx) {
+                console.error('Failed to get canvas context for clipboard');
+                // Fallback to regular copy
+                finalCanvas.toBlob(function (blob) {
+                  navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+                    .then(() => {
+                      copyButton.innerText = 'Copied!';
+                      setTimeout(() => {
+                        copyButton.innerText = 'Copy QR Code to Clipboard';
+                      }, 2000);
+                    })
+                    .catch(err => console.error('Error copying QR Code:', err));
+                });
+                return;
+              }
+              
+              // Draw white background
+              ctx.fillStyle = 'white';
+              ctx.fillRect(0, 0, totalWidth, totalHeight);
+              
+              // Edge-compatible approach to draw rounded rectangles
+              const radius = 24;
+              const width = totalWidth - (padding * 2);
+              const height = totalHeight - (padding * 2);
+              const x = padding;
+              const y = padding;
+              
+              // Custom method to draw rounded rectangle
+              function drawRoundedRect(ctx, x, y, width, height, radius) {
+                if (width < 2 * radius) radius = width / 2;
+                if (height < 2 * radius) radius = height / 2;
+                
+                // Begin path
+                ctx.beginPath();
+                
+                // Top-left arc
+                ctx.arc(x + radius, y + radius, radius, Math.PI, Math.PI * 1.5);
+                
+                // Top line
+                ctx.moveTo(x + radius, y);
+                ctx.lineTo(x + width - radius, y);
+                
+                // Top-right arc
+                ctx.arc(x + width - radius, y + radius, radius, Math.PI * 1.5, 0);
+                
+                // Right line
+                ctx.lineTo(x + width, y + height - radius);
+                
+                // Bottom-right arc
+                ctx.arc(x + width - radius, y + height - radius, radius, 0, Math.PI * 0.5);
+                
+                // Bottom line
+                ctx.lineTo(x + radius, y + height);
+                
+                // Bottom-left arc
+                ctx.arc(x + radius, y + height - radius, radius, Math.PI * 0.5, Math.PI);
+                
+                // Left line
+                ctx.lineTo(x, y + radius);
+                
+                ctx.closePath();
+              }
+              
+              // Create a clipping mask for the rounded rectangle
+              drawRoundedRect(ctx, x, y, width, height, radius);
+              ctx.save();
+              ctx.clip();
+              
+              // Draw the QR code on top
+              ctx.drawImage(finalCanvas, padding, padding);
+              
+              // Restore the context
+              ctx.restore();
+              
+              // Convert to blob and copy to clipboard
+              clipboardCanvas.toBlob(function (blob) {
+                navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+                  .then(() => {
+                    copyButton.innerText = 'Copied!';
+                    setTimeout(() => {
+                      copyButton.innerText = 'Copy QR Code to Clipboard';
+                    }, 2000);
+                  })
+                  .catch(err => {
+                    console.error('Error copying QR Code:', err);
+                    copyButton.innerText = 'Copy failed';
+                    setTimeout(() => {
+                      copyButton.innerText = 'Copy QR Code to Clipboard';
+                    }, 2000);
+                  });
+              });
+            } catch (err) {
+              console.error('Error in clipboard process', err);
+              // Fallback to basic copy without rounded corners
+              finalCanvas.toBlob(function (blob) {
+                navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+                  .then(() => {
+                    copyButton.innerText = 'Copied!';
+                    setTimeout(() => {
+                      copyButton.innerText = 'Copy QR Code to Clipboard';
+                    }, 2000);
+                  })
+                  .catch(err => console.error('Error copying QR Code:', err));
+              });
+            }
+          });
+          container.appendChild(copyButton);
+        };
+        
+        logo.onerror = function() {
+          // If logo fails to load, just use the regular QR code
+          console.error('Failed to load logo');
+          canvas.classList.add('rounded-lg');
+          canvas.setAttribute('alt', altText);
+          container.appendChild(canvas);
+          
+          // Add buttons as usual
+          const downloadButton = document.createElement('button');
+          downloadButton.className = 'primary-button text-white font-light py-2 px-4 rounded-lg focus:outline-none mb-2';
+          downloadButton.innerText = 'Download QR Code';
+          downloadButton.addEventListener('click', function () {
+            const link = document.createElement('a');
+            link.download = 'softtek-qrcode.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+          });
+          container.appendChild(downloadButton);
+  
+          const copyButton = document.createElement('button');
+          copyButton.className = 'primary-button text-white font-light py-2 px-4 rounded-lg focus:outline-none';
+          copyButton.innerText = 'Copy QR Code to Clipboard';
+          copyButton.addEventListener('click', function () {
+            canvas.toBlob(function (blob) {
+              navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+                .then(() => {
+                  copyButton.innerText = 'Copied!';
+                  setTimeout(() => {
+                    copyButton.innerText = 'Copy QR Code to Clipboard';
+                  }, 2000);
+                })
+                .catch(err => console.error('Error copying QR Code:', err));
+            });
+          });
+          container.appendChild(copyButton);
+        };
+      });
+    }
+  </script>
+
+
+</body></html>
