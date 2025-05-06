@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Softtek QR Code Generator</title>
@@ -12,6 +14,27 @@
       .dark-mode-bg {
         background-color: rgba(24, 24, 24, 0.8);
       }
+    }
+    
+    /* WhatsApp green styles */
+    .whatsapp-color {
+      color: #25D366;
+    }
+    
+    .whatsapp-bg {
+      background-color: #25D366;
+    }
+    
+    .whatsapp-bg:hover {
+      background-color: #1faf54;
+    }
+    
+    .whatsapp-tab.active:after {
+      background-color: #25D366 !important;
+    }
+    
+    .dark .whatsapp-tab.active {
+      color: #25D366 !important;
     }
 
     body {
@@ -159,7 +182,9 @@
   <div class="container-wrapper w-full max-w-md mx-auto">
     <!-- Logo container -->
     <div class="logo-container flex justify-center mb-4 mt-6">
-      <img src="https://pfst.cf2.poecdn.net/base/image/190e3b82b539f06bcb7f591718397d09164c781f0f9a43bb801e3b917ca2646c?w=207&amp;h=106" alt="Softtek Logo" class="logo-img">
+      <img src="https://pfst.cf2.poecdn.net/base/image/190e3b82b539f06bcb7f591718397d09164c781f0f9a43bb801e3b917ca2646c?w=207&h=106" 
+           alt="Softtek Logo" 
+           class="logo-img">
     </div>
 
     <!-- App Title -->
@@ -169,7 +194,7 @@
     <div class="flex justify-center mb-6">
       <div class="glass-effect rounded-lg flex p-1">
         <button id="emailTab" class="tab active px-5 py-2 rounded-md">Email</button>
-        <button id="whatsappTab" class="tab px-5 py-2 rounded-md">WhatsApp</button>
+        <button id="whatsappTab" class="tab whatsapp-tab px-5 py-2 rounded-md">WhatsApp</button>
       </div>
     </div>
 
@@ -177,13 +202,17 @@
     <div id="emailContent" class="tab-content active">
       <form id="emailForm" class="glass-effect rounded-xl p-6 mb-6">
         <div class="space-y-4">
-          <input type="email" id="email" placeholder="Recipient's Email" required="" class="w-full px-4 py-3 text-base rounded-lg border focus:outline-none">
+          <input type="email" id="email" placeholder="Recipient's Email" required
+                 class="w-full px-4 py-3 text-base rounded-lg border focus:outline-none">
           
-          <input type="text" id="subject" placeholder="Subject" required="" class="w-full px-4 py-3 text-base rounded-lg border focus:outline-none">
+          <input type="text" id="subject" placeholder="Subject" required
+                 class="w-full px-4 py-3 text-base rounded-lg border focus:outline-none">
           
-          <textarea id="body" rows="5" placeholder="Email Body" required="" class="w-full px-4 py-3 text-base rounded-lg border focus:outline-none resize-none"></textarea>
+          <textarea id="body" rows="5" placeholder="Email Body" required
+                    class="w-full px-4 py-3 text-base rounded-lg border focus:outline-none resize-none"></textarea>
           
-          <button type="submit" class="w-full primary-button text-white font-light py-3 px-4 rounded-lg focus:outline-none">
+          <button type="submit" 
+                  class="w-full primary-button text-white font-light py-3 px-4 rounded-lg focus:outline-none">
             Generate QR Code
           </button>
         </div>
@@ -198,17 +227,20 @@
       <form id="whatsappForm" class="glass-effect rounded-xl p-6 mb-6">
         <div class="space-y-4">
           <div class="relative">
-            <input type="tel" id="phoneNumber" placeholder="Phone Number (with country code)" required="" class="w-full px-4 py-3 pl-10 text-base rounded-lg border focus:outline-none">
+            <input type="tel" id="phoneNumber" placeholder="Phone Number (with country code)" required
+                   class="w-full px-4 py-3 pl-10 text-base rounded-lg border focus:outline-none">
             <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">+</div>
           </div>
           
-          <textarea id="whatsappMessage" rows="5" placeholder="WhatsApp Message" required="" class="w-full px-4 py-3 text-base rounded-lg border focus:outline-none resize-none"></textarea>
+          <textarea id="whatsappMessage" rows="5" placeholder="WhatsApp Message" required
+                    class="w-full px-4 py-3 text-base rounded-lg border focus:outline-none resize-none"></textarea>
           
           <div class="text-xs text-gray-500 dark:text-gray-400 italic">
             Enter phone number with country code (e.g., 5215518832771 for Mexico)
           </div>
           
-          <button type="submit" class="w-full primary-button text-white font-light py-3 px-4 rounded-lg focus:outline-none">
+          <button type="submit" 
+                  class="w-full whatsapp-bg text-white font-light py-3 px-4 rounded-lg focus:outline-none">
             Generate WhatsApp QR Code
           </button>
         </div>
@@ -258,8 +290,8 @@
       const qrCodeContainer = document.getElementById('emailQrCode');
       qrCodeContainer.innerHTML = ''; // Clear any previous QR Code
 
-      // Generate QR Code
-      generateQRCode(mailtoLink, qrCodeContainer, 'Email QR Code');
+      // Generate QR Code with default purple color
+      generateQRCode(mailtoLink, qrCodeContainer, 'Email QR Code', '#5D5CDE');
     });
     
     // WhatsApp QR code generation
@@ -285,12 +317,12 @@
       const qrCodeContainer = document.getElementById('whatsappQrCode');
       qrCodeContainer.innerHTML = ''; // Clear any previous QR Code
 
-      // Generate QR Code
-      generateQRCode(whatsappLink, qrCodeContainer, 'WhatsApp QR Code');
+      // Generate QR Code with WhatsApp green color
+      generateQRCode(whatsappLink, qrCodeContainer, 'WhatsApp QR Code', '#25D366');
     });
     
     // Common function to generate QR code with logo and add copy button
-    function generateQRCode(link, container, altText) {
+    function generateQRCode(link, container, altText, qrColor = '#5D5CDE') {
       // Show loading indicator
       const loadingEl = document.createElement('div');
       loadingEl.className = 'text-center text-sm text-gray-500 dark:text-gray-400 mb-2';
@@ -302,7 +334,7 @@
         width: 320, 
         margin: 4,
         color: {
-          dark: '#5D5CDE',
+          dark: qrColor,
           light: '#ffffff'
         },
         errorCorrectionLevel: 'Q' // Balance between capacity and error correction
@@ -397,9 +429,9 @@
           infoText.innerText = 'QR code includes Softtek logo';
           container.appendChild(infoText);
   
-          // Add Download Button
+          // Add Download Button - use WhatsApp green for WhatsApp QR codes
           const downloadButton = document.createElement('button');
-          downloadButton.className = 'primary-button text-white font-light py-2 px-4 rounded-lg focus:outline-none mb-2';
+          downloadButton.className = `${altText.includes('WhatsApp') ? 'whatsapp-bg' : 'primary-button'} text-white font-light py-2 px-4 rounded-lg focus:outline-none mb-2`;
           downloadButton.innerText = 'Download QR Code';
           downloadButton.addEventListener('click', function () {
             try {
@@ -506,9 +538,9 @@
           });
           container.appendChild(downloadButton);
   
-          // Add Copy Button
+          // Add Copy Button - use WhatsApp green for WhatsApp QR codes
           const copyButton = document.createElement('button');
-          copyButton.className = 'primary-button text-white font-light py-2 px-4 rounded-lg focus:outline-none';
+          copyButton.className = `${altText.includes('WhatsApp') ? 'whatsapp-bg' : 'primary-button'} text-white font-light py-2 px-4 rounded-lg focus:outline-none`;
           copyButton.innerText = 'Copy QR Code to Clipboard';
           copyButton.addEventListener('click', function () {
             try {
@@ -673,6 +705,5 @@
       });
     }
   </script>
-
-
-</body></html>
+</body>
+</html>
