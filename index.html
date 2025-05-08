@@ -36,6 +36,27 @@
     .dark .whatsapp-tab.active {
       color: #25D366 !important;
     }
+    
+    /* SMS blue styles */
+    .sms-color {
+      color: #1E88E5;
+    }
+    
+    .sms-bg {
+      background-color: #1E88E5;
+    }
+    
+    .sms-bg:hover {
+      background-color: #1976D2;
+    }
+    
+    .sms-tab.active:after {
+      background-color: #1E88E5 !important;
+    }
+    
+    .dark .sms-tab.active {
+      color: #1E88E5 !important;
+    }
 
     body {
       font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -193,8 +214,9 @@
     <!-- Tab Navigation -->
     <div class="flex justify-center mb-6">
       <div class="glass-effect rounded-lg flex p-1">
-        <button id="emailTab" class="tab active px-5 py-2 rounded-md">Email</button>
-        <button id="whatsappTab" class="tab whatsapp-tab px-5 py-2 rounded-md">WhatsApp</button>
+        <button id="emailTab" class="tab active px-4 py-2 rounded-md">Email</button>
+        <button id="whatsappTab" class="tab whatsapp-tab px-4 py-2 rounded-md">WhatsApp</button>
+        <button id="smsTab" class="tab sms-tab px-4 py-2 rounded-md">SMS</button>
       </div>
     </div>
 
@@ -227,7 +249,7 @@
       <form id="whatsappForm" class="glass-effect rounded-xl p-6 mb-6">
         <div class="space-y-4">
           <div class="relative">
-            <input type="tel" id="phoneNumber" placeholder="Phone Number (with country code)" required
+            <input type="tel" id="whatsappPhone" placeholder="Phone Number (with country code)" required
                    class="w-full px-4 py-3 pl-10 text-base rounded-lg border focus:outline-none">
             <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">+</div>
           </div>
@@ -249,6 +271,34 @@
       <!-- WhatsApp QR Code Display -->
       <div id="whatsappQrCode" class="qr-display flex flex-col items-center space-y-4 mb-8"></div>
     </div>
+    
+    <!-- SMS Form -->
+    <div id="smsContent" class="tab-content">
+      <form id="smsForm" class="glass-effect rounded-xl p-6 mb-6">
+        <div class="space-y-4">
+          <div class="relative">
+            <input type="tel" id="smsPhone" placeholder="Phone Number (with country code)" required
+                   class="w-full px-4 py-3 pl-10 text-base rounded-lg border focus:outline-none">
+            <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">+</div>
+          </div>
+          
+          <textarea id="smsMessage" rows="5" placeholder="SMS Message" required
+                    class="w-full px-4 py-3 text-base rounded-lg border focus:outline-none resize-none"></textarea>
+          
+          <div class="text-xs text-gray-500 dark:text-gray-400 italic">
+            Standard text message rates may apply when users scan this QR code
+          </div>
+          
+          <button type="submit" 
+                  class="w-full sms-bg text-white font-light py-3 px-4 rounded-lg focus:outline-none">
+            Generate SMS QR Code
+          </button>
+        </div>
+      </form>
+      
+      <!-- SMS QR Code Display -->
+      <div id="smsQrCode" class="qr-display flex flex-col items-center space-y-4 mb-8"></div>
+    </div>
   </div>
 
   <!-- Footer -->
@@ -260,21 +310,39 @@
     // Tab functionality
     const emailTab = document.getElementById('emailTab');
     const whatsappTab = document.getElementById('whatsappTab');
+    const smsTab = document.getElementById('smsTab');
+    
     const emailContent = document.getElementById('emailContent');
     const whatsappContent = document.getElementById('whatsappContent');
+    const smsContent = document.getElementById('smsContent');
+    
+    function hideAllTabs() {
+      // Hide all tabs and remove active classes
+      emailTab.classList.remove('active');
+      whatsappTab.classList.remove('active');
+      smsTab.classList.remove('active');
+      
+      emailContent.classList.remove('active');
+      whatsappContent.classList.remove('active');
+      smsContent.classList.remove('active');
+    }
     
     emailTab.addEventListener('click', () => {
+      hideAllTabs();
       emailTab.classList.add('active');
-      whatsappTab.classList.remove('active');
       emailContent.classList.add('active');
-      whatsappContent.classList.remove('active');
     });
     
     whatsappTab.addEventListener('click', () => {
+      hideAllTabs();
       whatsappTab.classList.add('active');
-      emailTab.classList.remove('active');
       whatsappContent.classList.add('active');
-      emailContent.classList.remove('active');
+    });
+    
+    smsTab.addEventListener('click', () => {
+      hideAllTabs();
+      smsTab.classList.add('active');
+      smsContent.classList.add('active');
     });
 
     // Email QR code generation
@@ -299,7 +367,7 @@
       event.preventDefault();
 
       // Get the phone number and ensure it's formatted correctly
-      let phoneNumber = document.getElementById('phoneNumber').value;
+      let phoneNumber = document.getElementById('whatsappPhone').value;
       
       // Remove any non-numeric characters
       phoneNumber = phoneNumber.replace(/\D/g, '');
@@ -319,6 +387,33 @@
 
       // Generate QR Code with WhatsApp green color
       generateQRCode(whatsappLink, qrCodeContainer, 'WhatsApp QR Code', '#25D366');
+    });
+    
+    // SMS QR code generation
+    document.getElementById('smsForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      // Get the phone number and ensure it's formatted correctly
+      let phoneNumber = document.getElementById('smsPhone').value;
+      
+      // Remove any non-numeric characters
+      phoneNumber = phoneNumber.replace(/\D/g, '');
+      
+      // Ensure it has a "+" prefix
+      if (!phoneNumber.startsWith('+')) {
+        phoneNumber = '+' + phoneNumber;
+      }
+      
+      const message = encodeURIComponent(document.getElementById('smsMessage').value);
+
+      // Create the SMS URL - format: sms:+PHONENUMBER?body=MESSAGE
+      const smsLink = `sms:${phoneNumber}&body=${message}`;
+
+      const qrCodeContainer = document.getElementById('smsQrCode');
+      qrCodeContainer.innerHTML = ''; // Clear any previous QR Code
+
+      // Generate QR Code with SMS blue color
+      generateQRCode(smsLink, qrCodeContainer, 'SMS QR Code', '#1E88E5');
     });
     
     // Common function to generate QR code with logo and add copy button
@@ -362,10 +457,10 @@
         // Draw the QR code onto the new canvas
         ctx.drawImage(canvas, 0, 0);
         
-        // Create and load a higher resolution version of the Softtek logo
+        // Create and load the new Softtek logo
         const logo = new Image();
         logo.crossOrigin = "anonymous";
-        logo.src = "https://pfst.cf2.poecdn.net/base/image/190e3b82b539f06bcb7f591718397d09164c781f0f9a43bb801e3b917ca2646c?w=414&h=212"; // Requesting a higher resolution version
+        logo.src = "https://pfst.cf2.poecdn.net/base/image/932120da2566b5fcbd9465aa3e02e5acc6f8a8c95e7a9846facf8a0ba9608f89?w=1112&h=249"; // Using the new logo
         
         logo.onload = function() {
           // Calculate background square size (about 27% of QR code)
@@ -429,9 +524,17 @@
           infoText.innerText = 'QR code includes Softtek logo';
           container.appendChild(infoText);
   
-          // Add Download Button - use WhatsApp green for WhatsApp QR codes
+          // Add Download Button with appropriate color
           const downloadButton = document.createElement('button');
-          downloadButton.className = `${altText.includes('WhatsApp') ? 'whatsapp-bg' : 'primary-button'} text-white font-light py-2 px-4 rounded-lg focus:outline-none mb-2`;
+          let buttonClass = 'primary-button'; // Default purple
+          
+          if (altText.includes('WhatsApp')) {
+            buttonClass = 'whatsapp-bg'; // Green for WhatsApp
+          } else if (altText.includes('SMS')) {
+            buttonClass = 'sms-bg'; // Blue for SMS
+          }
+          
+          downloadButton.className = `${buttonClass} text-white font-light py-2 px-4 rounded-lg focus:outline-none mb-2`;
           downloadButton.innerText = 'Download QR Code';
           downloadButton.addEventListener('click', function () {
             try {
@@ -538,9 +641,10 @@
           });
           container.appendChild(downloadButton);
   
-          // Add Copy Button - use WhatsApp green for WhatsApp QR codes
+          // Add Copy Button with appropriate color (same logic as download button)
           const copyButton = document.createElement('button');
-          copyButton.className = `${altText.includes('WhatsApp') ? 'whatsapp-bg' : 'primary-button'} text-white font-light py-2 px-4 rounded-lg focus:outline-none`;
+          // Reuse the same button class as download button
+          copyButton.className = `${buttonClass} text-white font-light py-2 px-4 rounded-lg focus:outline-none`;
           copyButton.innerText = 'Copy QR Code to Clipboard';
           copyButton.addEventListener('click', function () {
             try {
